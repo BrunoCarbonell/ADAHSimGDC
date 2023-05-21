@@ -27,7 +27,16 @@ namespace StarterAssets
         {
             starterAssetsInputs.SprintInput(virtualSprintState);
         }
+
+        public void VirtualInteractInput(bool virtualInteracrState)
+        {
+            starterAssetsInputs.InteractInput(virtualInteracrState);
+        }
         
+        public void VirtualActionInput(bool virtualActionState)
+        {
+            starterAssetsInputs.ActionInput(virtualActionState);
+        }
     }
 
 }
