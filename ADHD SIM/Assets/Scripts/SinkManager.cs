@@ -15,9 +15,48 @@ public class SinkManager : MonoBehaviour
     [SerializeField] private GameObject[] cleanSpoons;
     private int spoonsCleaned = -1;
 
-    // Start is called before the first frame update
-   public void AddCleanDish(DishType type)
+    [SerializeField] private GameObject[] dirtyDishes;
+
+    public GameObject shirt;
+    [SerializeField]private int count=0;
+
+    private void Start()
     {
+        shirt.SetActive(false);
+        count = 0;
+        
+
+    }
+
+    private void OnEnable()
+    {
+        shirt.SetActive(false);
+        count = 0;
+        platesCleaned = -1;
+        glassesCleaned = -1;
+        forksCleaned = -1;
+        knifesCleaned = -1;
+        spoonsCleaned = -1;
+        foreach (GameObject go in cleanPlates)
+            go.SetActive(false);
+
+        foreach (GameObject go in cleanGlasses)
+            go.SetActive(false);
+        foreach (GameObject go in cleanForks)
+            go.SetActive(false);
+        foreach (GameObject go in cleanKnifes)
+            go.SetActive(false);
+        foreach (GameObject go in cleanForks)
+            go.SetActive(false);
+
+        foreach (GameObject go in dirtyDishes)
+            go.SetActive(true);
+    }
+    // Start is called before the first frame update
+    public void AddCleanDish(DishType type)
+    {
+
+        TrySpawningShirt();
         switch (type)
         {
             case DishType.NONE:
@@ -58,6 +97,21 @@ public class SinkManager : MonoBehaviour
                 }
                 break;
 
+        }
+    }
+
+    public void TrySpawningShirt()
+    {
+        count++;
+        if (count >= 3)
+        {
+            if (Random.Range(0, 3) == 1)
+            {
+                shirt.SetActive(true);
+            }
+
+            if(count > 7)
+                shirt.SetActive(true);
         }
     }
 }

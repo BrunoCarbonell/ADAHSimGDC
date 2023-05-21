@@ -15,6 +15,7 @@ public class PlayerManager : MonoBehaviour
     public GameObject fork;
     public GameObject knife;
     public GameObject spoon;
+    public GameObject shirt;
     public bool dishClean = false;
     public Material dishMaterial;
     private Animator anim;
@@ -22,6 +23,20 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private GameObject islookingAt = null;
     RaycastHit HitInfo;
     private bool startedClean = false;
+    public Transform sink;
+    public Transform closet;
+    private Vector3 closetScreenPos;
+    private bool isSinkOnScreen;
+    private bool isClosetOnScreen;
+    public float objectSize;
+
+    private bool isHoldingSponge = false;
+    private bool isHoldingShirt = false;
+
+
+    public AudioSource water;
+    public AudioSource pickUpPlate;
+    public AudioSource placePlate;
 
     // Start is called before the first frame update
     void Start()
@@ -35,6 +50,9 @@ public class PlayerManager : MonoBehaviour
         if(_input.action && isholding && objType == ObjectType.DISH && !dishClean && !startedClean)
         {
             startedClean = true;
+
+            if(!water.isPlaying)
+                water.Play();
             anim.SetTrigger("Clean");
         }
     }
@@ -54,6 +72,11 @@ public class PlayerManager : MonoBehaviour
                 dishType = islookingAt.GetComponent<Dish>().type;
                 dishClean = false;
                 sponge.SetActive(true);
+                pickUpPlate.Play();
+                if (isHoldingSponge)
+                    isHoldingSponge = false;
+
+
                 switch (dishType)
                 {
                     case DishType.PLATE:
@@ -73,12 +96,38 @@ public class PlayerManager : MonoBehaviour
                         break;
                 }
             }
+
+            if(islookingAt.GetComponent<FoldedShirtManager>() != null)
+            {
+                objType = ObjectType.SHIRT;
+                islookingAt.GetComponent<FoldedShirtManager>().PickupShirt();
+                shirt.SetActive(true);
+            }
+
+            if(islookingAt.GetComponent<TriggerObject>() != null)
+            {
+                objType = islookingAt.GetComponent<TriggerObject>().type;
+                if (objType == ObjectType.SHIRT)
+                {
+                    shirt.SetActive(true);
+                    isHoldingShirt = true;
+                }
+                else
+                {
+                    isHoldingSponge = true;
+                    sponge.SetActive(true);
+                    isholding = false;
+                }
+
+                islookingAt.GetComponent<TriggerObject>().StartPuzzle();
+
+            }
         }
         if(islookingAt != null && _input.interact && isholding)
         {
             if (islookingAt.CompareTag("placeble"))
             {
-                if(objType == ObjectType.DISH && dishClean)
+                if(objType == ObjectType.DISH && dishClean && islookingAt.GetComponent<SinkManager>() != null)
                 {
                     isholding = false;
                     switch (dishType)
@@ -100,10 +149,21 @@ public class PlayerManager : MonoBehaviour
                             break;
                     }
                     sponge.SetActive(false);
+                    placePlate.Play();
                     islookingAt.GetComponent<SinkManager>().AddCleanDish(dishType);
                     objType = ObjectType.NONE;
                     dishType = DishType.NONE;
                     anim.SetTrigger("NewPlate");
+                }
+
+                if(objType == ObjectType.SHIRT && islookingAt.GetComponent<ClosetManager>() != null)
+                {
+                    if (isHoldingShirt)
+                        isHoldingShirt = false;
+                    islookingAt.GetComponent<ClosetManager>().PlaceShirt();
+                    shirt.SetActive(false);
+                    objType= ObjectType.NONE;
+                    isholding = false;
                 }
 
             }
@@ -113,6 +173,35 @@ public class PlayerManager : MonoBehaviour
     private void Update()
     {
         Transform cameraTransform = Camera.main.transform;
+        
+        if (isHoldingShirt)
+        {
+            isSinkOnScreen = IsVisible(Camera.main ,sink.gameObject);
+
+            if (!isSinkOnScreen)
+            {
+                sink.gameObject.SetActive(false);
+                Debug.Log("Cant see sink");
+            }
+                
+        }
+
+        if (isHoldingSponge)
+        {
+            isClosetOnScreen = IsVisible(Camera.main, closet.gameObject);
+
+            if (!isClosetOnScreen)
+            {
+                closet.gameObject.SetActive(false);
+                Debug.Log("Cant see closet");
+
+            }
+        }
+
+       
+
+
+
 
         if (Physics.Raycast(cameraTransform.position, cameraTransform.forward, out HitInfo, 5.0f))
         {
@@ -153,7 +242,19 @@ public class PlayerManager : MonoBehaviour
         Action();
     }
 
+    private bool IsVisible(Camera c, GameObject target)
+    {
 
+        var planes = GeometryUtility.CalculateFrustumPlanes(c);
+        var point = target.transform.position;
+
+        foreach(var plane in planes)
+        {
+            if (plane.GetDistanceToPoint(point) < objectSize)
+                return false;
+        }
+        return true;
+    }
 
     public void FinishClean()
     {
