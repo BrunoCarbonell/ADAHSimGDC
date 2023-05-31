@@ -45,7 +45,7 @@
                     "name": "Interact",
                     "type": "PassThrough",
                     "id": "2e58e57e-dda9-414d-9932-6c6940811b6f",
-                    "expectedControlType": "",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -240,7 +240,7 @@
                 {
                     "name": "",
                     "id": "66a7fdd6-872c-4a00-9d3a-d3d1981d5aba",
-                    "path": "<Keyboard>/e",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",

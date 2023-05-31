@@ -46,7 +46,7 @@ public class PlayerManager : MonoBehaviour
     }
 
     private void Action()
-    {
+    {/*
         if(_input.action && isholding && objType == ObjectType.DISH && !dishClean && !startedClean)
         {
             startedClean = true;
@@ -54,7 +54,7 @@ public class PlayerManager : MonoBehaviour
             if(!water.isPlaying)
                 water.Play();
             anim.SetTrigger("Clean");
-        }
+        }*/
     }
 
     private void Interact()
@@ -165,9 +165,16 @@ public class PlayerManager : MonoBehaviour
                     objType= ObjectType.NONE;
                     isholding = false;
                 }
-
             }
+        }else if (_input.interact && isholding && objType == ObjectType.DISH && !dishClean && !startedClean)
+        {
+            startedClean = true;
+
+            if (!water.isPlaying)
+                water.Play();
+            anim.SetTrigger("Clean");
         }
+
     }
 
     private void Update()
@@ -221,9 +228,11 @@ public class PlayerManager : MonoBehaviour
             if(isholding && HitInfo.collider.CompareTag("placeble") && islookingAt != HitInfo.collider.gameObject)
             {
                 islookingAt = HitInfo.collider.gameObject;
+                islookingAt.GetComponent<Outline>().enabled = true;
+
             }
 
-            if(!HitInfo.collider.CompareTag("Interactable") && !HitInfo.collider.CompareTag("placeble"))
+            if (!HitInfo.collider.CompareTag("Interactable") && !HitInfo.collider.CompareTag("placeble"))
                 islookingAt = null;
 
         }
